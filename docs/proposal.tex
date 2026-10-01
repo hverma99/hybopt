@@ -1,0 +1,54 @@
+\documentclass[11pt]{article}
+
+\usepackage[letterpaper,margin=0.78in]{geometry}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{titlesec}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlist[itemize]{leftmargin=1.35em,itemsep=1pt,topsep=2pt}
+\titleformat{\section}{\large\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{8pt}{2pt}
+
+\begin{document}
+
+\begin{center}
+  {\Large\bfseries APC 524 Project Proposal}\\[2pt]
+  {\large Embedding Trained Neural Networks in Optimization Models}\\[3pt]
+  Brooke Soobrian \quad\textbullet\quad Harshit Verma \quad\textbullet\quad Zhe Li\\[-1pt]
+  Fall 2026
+\end{center}
+
+\section*{Motivation and scope}
+
+Neural networks can serve as fast approximations of experiments or expensive simulations. In many engineering applications, we then want to choose the inputs that produce the best predicted design. This requires placing a trained network inside an optimization model, where common activation functions can be difficult for optimization software to represent and solve efficiently.
+
+We will develop a small, tested Python package that converts an already-trained feed-forward neural network into an optimization model. Users will be able to minimize the network output directly or use the network as one component of a larger model. We will focus on dense networks with bounded inputs, a single hidden activation type, and a linear output layer. Network training and the development of a new general-purpose solver are outside the project scope.
+
+\section*{Planned work}
+
+The package will compare several ways of representing two common activation functions:
+\begin{itemize}
+  \item \textbf{ReLU networks:} a baseline mixed-integer formulation; tighter versions using improved bounds or partitioning; post-training scaling; and a combination of scaling and bound tightening.
+  \item \textbf{Tanh networks:} three full-space formulations based on different algebraic forms of tanh and one reduced-space formulation that substitutes the network directly into the optimization problem.
+  \item \textbf{Benchmarking:} trained approximations of the Peaks, Ackley, and Himmelblau test functions, with comparisons based on solution time, model size, optimality gap, and relaxation quality.
+\end{itemize}
+
+This comparison will help answer a practical question: when is the extra work required to build a tighter formulation rewarded by a faster or more reliable solve? The ReLU methods will be completed first; the same package interface will then be extended to tanh.
+
+\section*{Implementation and deliverables}
+
+The package will load network weights from PyTorch or NumPy and build models with Pyomo. Gurobi and HiGHS will solve linear and mixed-integer problems, while SCIP will handle nonlinear tanh models. A common method interface will make the alternatives easy to select and compare.
+
+We will check each formulation against direct network evaluations and against small optimization problems with known or independently computed solutions. Automated tests will verify bounds, transformations, and consistent solver results. The final deliverables will be an installable Python package, documentation and examples, a reproducible benchmark suite, and a short report describing the main computational tradeoffs.
+
+\vspace{1pt}
+{\small
+\textbf{References.}
+C.~Plate et al., ``An analysis of optimization problems involving ReLU neural networks,'' \emph{Optimization and Engineering}, 2026.\\
+A.~M. Schweidtmann and A.~Mitsos, ``Deterministic global optimization with artificial neural networks embedded,'' \emph{Journal of Optimization Theory and Applications}, 2019.
+}
+
+\end{document}
