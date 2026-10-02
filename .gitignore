@@ -1,7 +1,7 @@
 /literature
+/.vscode
+/proposal-template
 
-*.md
 *.pdf
 *.docx
 *.json
-/.vscode
