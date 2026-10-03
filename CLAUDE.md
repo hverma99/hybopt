@@ -4,18 +4,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-**hybopt** is a CSE/APC 524 group project (Brooke Soobrian, Harshit Verma, Zhe Li; Fall 2026). The repository is currently at the **proposal stage — there is no Python code, build system, or test suite yet.** Do not assume commands such as `pytest` or `pip install -e .` work until a `pyproject.toml` and `tests/` exist.
+**hybopt** is a CSE/APC 524 group project (Brooke Soobrian, Harshit Verma, Zhe Li; Fall 2026). Stages 1–2 of the pipeline (data generation, training) are implemented; embedding/solution methods (`methods/`, `solve.py`, `benchmark.py`, scripts 3–4) are not yet. The target layout is `docs/repo-outline.md`.
 
-What exists:
+Commands (a project `.venv` reuses the system NumPy/SciPy via `--system-site-packages`):
+- `python -m venv --system-site-packages .venv && .venv/Scripts/python -m pip install -e ".[dev]"`
+- `.venv/Scripts/python -m pip install torch --index-url https://download.pytorch.org/whl/cpu`
+- `.venv/Scripts/python -m pytest` — all tests; `-k <name>` for one
+- `.venv/Scripts/python scripts/generate_data.py configs/data.yaml` → `outputs/data/<fn>__d<seed>.csv`
+- `.venv/Scripts/python scripts/train.py configs/relu.yaml` (or `tanh.yaml`) → `outputs/models/<fn>__<act>__h<depth>x<width>__t<seed>/`
+
+Scripts skip artifacts whose `meta.json` config matches and refuse to overwrite a differing one without `--force`. The code that produces the benchmark networks lives in the `hybopt.surrogates` subpackage (`src/hybopt/surrogates/`: `functions.py`, `data.py`, `network.py`, `train.py`; tests in `tests/surrogates/`); the optimization side (methods, solve, benchmark) will sit beside it in `src/hybopt/`. The data CSV holds raw samples only; `DataModule` (`data.py`, modeled on the user's pinnse package) applies the seeded split from `configs/data.yaml` (recorded in the dataset's `meta.json`), normalizes, and returns train/val/test `DataLoader`s. `network.py` builds the model (`nn.Sequential`), and `fold_normalization` returns a float64 copy with the input/output normalization folded into its first/last Linear layers, so it maps raw inputs to raw outputs; that copy is saved as `model.pt` (+ `meta.json` with `layer_sizes`, `activation`, domain) and reloaded with `load_model`. Training (`train.py`: Adam, early stopping, one CPU thread for reproducibility) uses PyTorch. Test-function domains follow Plate et al. (2026): Peaks [-2,2]², Ackley [-3.5,3.5]², Himmelblau [-5,5]².
+
+Other files:
 - `docs/proposal.tex` (+ compiled `proposal.pdf`) — the submitted one-page proposal. Built with the VS Code LaTeX Workshop extension (`.vscode/settings.json` auto-cleans aux files).
 - `docs/description.md` — the latest project description (most current statement of scope).
 - `literature/` — the two reference papers (`s11081-026-10075-8.pdf` = Plate et al. 2026, ReLU; `s10957-018-1396-0.pdf` = Schweidtmann & Mitsos 2019, tanh) and `Project Design.docx`, the detailed design plan with the method menu and API.
 
-**`.gitignore` excludes `*.md`, `*.pdf`, `*.docx`, `*.json`, `/literature`, and `/.vscode`.** This means `CLAUDE.md`, `docs/description.md`, and future `README.md`/mkdocs pages are untracked unless the ignore rules are changed (or files are force-added). Flag this when adding documentation or JSON config.
+`.gitignore` excludes `/outputs/`, `/.venv/`, `*.pdf`, `*.docx`, `/literature`, and `/.vscode`.
 
 ## What the package will do
 
-Convert an already-trained dense feed-forward network (bounded box inputs, one hidden activation type for all layers, linear output layer; no skip connections/normalization/dropout) into a Pyomo optimization model. Training and writing a new solver are out of scope (a thin seeded `examples/train.py` in PyTorch only produces benchmark networks).
+Convert an already-trained dense feed-forward network (bounded box inputs, one hidden activation type for all layers, linear output layer; no skip connections/normalization/dropout) into a Pyomo optimization model. Training and writing a new solver are out of scope as package features (`hybopt.surrogates` only produces the benchmark networks).
 
 Data flow: load net → (optional) preprocessing: bound computation / OBBT / scaling → formulation builder looked up in a **string-keyed method registry** → solve via Pyomo (Gurobi/HiGHS for MILP, SCIP for nonlinear tanh, IPOPT possible) → benchmark row.
 
