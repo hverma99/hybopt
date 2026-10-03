@@ -1,0 +1,18 @@
+# Configuration for generating benchmark data.
+# The dataset includes multiple synthetic functions with different sample budgets.
+functions: [peaks, ackley, himmelblau]
+
+# Sampling strategy: Latin Hypercube Sampling (LHS) for space-filling coverage.
+design: lhs
+
+# Fixed random seed to ensure reproducible data generation across runs.
+seed: 0
+
+# Number of samples allocated to each benchmark function.
+n_samples:
+  peaks: 10000
+  ackley: 15000
+  himmelblau: 10000
+
+# Train/validation/test proportions for dataset splitting.
+split: {train: 0.70, val: 0.15, test: 0.15}
