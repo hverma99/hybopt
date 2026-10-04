@@ -4,16 +4,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-**hybopt** is a CSE/APC 524 group project (Brooke Soobrian, Harshit Verma, Zhe Li; Fall 2026). Stages 1–2 of the pipeline (data generation, training) are implemented; embedding/solution methods (`methods/`, `solve.py`, `benchmark.py`, scripts 3–4) are not yet. The target layout is `docs/repo-outline.md`.
+**hybopt** is a CSE/APC 524 group project (Brooke Soobrian, Harshit Verma, Zhe Li; Fall 2026). Stages 1–2 of the pipeline (data generation, surrogate training) are implemented; embedding/solution methods (`methods/`, `solve.py`, `benchmark.py`, scripts 3–4) are not yet.
 
 Commands (a project `.venv` reuses the system NumPy/SciPy via `--system-site-packages`):
-- `python -m venv --system-site-packages .venv && .venv/Scripts/python -m pip install -e ".[dev]"`
+- `python -m venv --system-site-packages .venv && .venv/Scripts/python -m pip install -e ".[dev]"` (rerun the editable install after adding a top-level package under `src/`)
 - `.venv/Scripts/python -m pip install torch --index-url https://download.pytorch.org/whl/cpu`
 - `.venv/Scripts/python -m pytest` — all tests; `-k <name>` for one
 - `.venv/Scripts/python scripts/generate_data.py configs/data.yaml` → `outputs/data/<fn>__d<seed>.csv`
-- `.venv/Scripts/python scripts/train.py configs/relu.yaml` (or `tanh.yaml`) → `outputs/models/<fn>__<act>__h<depth>x<width>__t<seed>/`
+- `.venv/Scripts/python scripts/train.py configs/relu.yaml --jobs 8` (or `tanh.yaml`) → `outputs/models/<data>__<act>__h<depth>x<width>__t<seed>/` for the benchmark functions; add `--data configs/datasets/<name>.yaml` to train on a labeled CSV instead. `--jobs` trains networks in parallel (joblib, one torch thread each, so results do not depend on it), `--functions` limits the benchmark run, `--output-root` picks the folder.
 
-Scripts skip artifacts whose `meta.json` config matches and refuse to overwrite a differing one without `--force`. The code that produces the benchmark networks lives in the `hybopt.surrogates` subpackage (`src/hybopt/surrogates/`: `functions.py`, `data.py`, `network.py`, `train.py`; tests in `tests/surrogates/`); the optimization side (methods, solve, benchmark) will sit beside it in `src/hybopt/`. The data CSV holds raw samples only; `DataModule` (`data.py`, modeled on the user's pinnse package) applies the seeded split from `configs/data.yaml` (recorded in the dataset's `meta.json`), normalizes, and returns train/val/test `DataLoader`s. `network.py` builds the model (`nn.Sequential`), and `fold_normalization` returns a float64 copy with the input/output normalization folded into its first/last Linear layers, so it maps raw inputs to raw outputs; that copy is saved as `model.pt` (+ `meta.json` with `layer_sizes`, `activation`, domain) and reloaded with `load_model`. Training (`train.py`: Adam, early stopping, one CPU thread for reproducibility) uses PyTorch. Test-function domains follow Plate et al. (2026): Peaks [-2,2]², Ackley [-3.5,3.5]², Himmelblau [-5,5]².
+Layout of `src/` (tests mirror it in `tests/<package>/`; `tests/scripts/` runs the scripts end to end):
+- `hybopt/data/` — labeled data shared by every surrogate type. `Dataset` (`dataset.py`): checked float arrays x (n, n_inputs) and y (n, n_outputs), column names, input box (default: data min/max; it becomes the input domain in the optimization model) and a name; built from arrays/DataFrames, `Dataset.from_frame(frame, inputs, outputs, ...)` or `Dataset.from_csv(path, inputs, outputs, ...)`; `split()`, `subset()`, `to_frame()`. `split.py`: `split_fractions` and the seeded `split_indices` (torch `random_split`; identical for every surrogate type so they are compared on the same rows; pinned by a test because trained models depend on it).
+- `hybopt/ann/` — ANN surrogates (other surrogate types get their own subpackages beside it, fitted to the same `Dataset`). Entry point `fit_ann(x, y=None, *, split, activation, depth, width, lower_bound=None, upper_bound=None, seed=0, split_seed=0, settings, save_to, meta, overwrite)` in `surrogate.py`: `x` is a `Dataset`, or arrays/DataFrames with `y`; it trains, reports train/val/test errors (combined and per output), and returns an `ANNSurrogate` (`predict` — a DataFrame is matched to the inputs by column name and gives a DataFrame — `save`, `load`). `data.py`: `DataModule(dataset, batch_size, split, random_state)` scales inputs to [-1, 1], standardizes outputs on the training split, and returns train/val/test `DataLoader`s (modeled on the user's pinnse package). `network.py`: `build_model` (`nn.Sequential`; He-normal init for ReLU, PyTorch default for tanh), `fold_normalization` (float64 copy with the scaling folded into the first/last Linear layers, so it maps raw inputs to raw outputs), `save_model`/`load_model` (`model.pt` + `meta.json` with `layer_sizes`, `activation`, domain, normalization, metrics; `meta.json` is written last). `train.py`: `TrainSettings`, Adam with early stopping, `error_metrics`. `checks.py`: `positive_int`.
+- `benchmarks/` — a separate top-level package (not part of the `hybopt` library) with the benchmark problems: `functions.py` (Peaks, Ackley, Himmelblau as `TestFunction` with domains and known minima, registry `get_function`; domains follow Plate et al. 2026: Peaks [-2,2]², Ackley [-3.5,3.5]², Himmelblau [-5,5]²) and `sampling.py` (`sample_function` → arrays, `sample_dataset` → `Dataset` with the domain as input box; `save_samples`/`load_samples` CSV with exact float round-trip). It depends on `hybopt.data`; `hybopt` never imports it.
+- The optimization side (methods, solve, benchmark) will sit in `src/hybopt/`.
+
+Scripts skip models whose `meta.json` config matches and refuse to overwrite a differing one without `--force`. Benchmark data CSVs hold raw samples only; the split from `configs/data.yaml` is recorded in the dataset's `meta.json`. A data set config (`configs/datasets/*.yaml`) gives `csv`, `inputs`, `outputs`, optional `bounds` (for every input), `split`, `split_seed` and `name`.
+
+## Working conventions
+
+- **Python packages:** when a well-established package makes the code clearly more concise or more effective, install it in `.venv` (`.venv/Scripts/python -m pip install <pkg>`) and add it to `pyproject.toml`, then say why in the summary. Prefer small, standard packages (currently numpy, scipy, torch, pandas, joblib, pyyaml, pytest). Do not switch the ML framework (PyTorch) without asking.
+- Use pandas for tabular data and CSV files; keep NumPy/torch for numerics.
+- Never overwrite saved models or results in `outputs/`; write new runs to a new `--output-root`.
 
 Other files:
 - `docs/proposal.tex` (+ compiled `proposal.pdf`) — the submitted one-page proposal. Built with the VS Code LaTeX Workshop extension (`.vscode/settings.json` auto-cleans aux files).
@@ -24,7 +36,7 @@ Other files:
 
 ## What the package will do
 
-Convert an already-trained dense feed-forward network (bounded box inputs, one hidden activation type for all layers, linear output layer; no skip connections/normalization/dropout) into a Pyomo optimization model. Training and writing a new solver are out of scope as package features (`hybopt.surrogates` only produces the benchmark networks).
+Convert an already-trained dense feed-forward network (bounded box inputs, one hidden activation type for all layers, linear output layer; no skip connections/normalization/dropout) into a Pyomo optimization model. Training and writing a new solver are out of scope as package features (`hybopt.ann` only produces the benchmark networks).
 
 Data flow: load net → (optional) preprocessing: bound computation / OBBT / scaling → formulation builder looked up in a **string-keyed method registry** → solve via Pyomo (Gurobi/HiGHS for MILP, SCIP for nonlinear tanh, IPOPT possible) → benchmark row.
 

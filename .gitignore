@@ -8,6 +8,8 @@ repo-outline.md
 
 /outputs/
 
+/.claude
+
 # Python
 /.venv/
 __pycache__/
