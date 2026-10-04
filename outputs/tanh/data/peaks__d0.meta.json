@@ -1,0 +1,28 @@
+{
+  "config": {
+    "function": "peaks",
+    "n_samples": 10000,
+    "design": "lhs",
+    "seed": 0,
+    "split": {
+      "train": 0.7,
+      "val": 0.15,
+      "test": 0.15
+    }
+  },
+  "domain": {
+    "lower_bound": [
+      -2.0,
+      -2.0
+    ],
+    "upper_bound": [
+      2.0,
+      2.0
+    ]
+  },
+  "y_range": [
+    -6.540713272579384,
+    8.091995794700576
+  ],
+  "source_config": "configs/data.yaml"
+}

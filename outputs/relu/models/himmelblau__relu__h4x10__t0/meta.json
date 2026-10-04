@@ -1,0 +1,133 @@
+{
+  "config": {
+    "function": "himmelblau",
+    "dataset": "data/himmelblau__d0.csv",
+    "split": {
+      "train": 0.7,
+      "val": 0.15,
+      "test": 0.15
+    },
+    "activation": "relu",
+    "hidden_widths": [
+      10,
+      10,
+      10,
+      10
+    ],
+    "seed": 0,
+    "settings": {
+      "lr": 0.003,
+      "batch_size": 64,
+      "epochs": 1000,
+      "patience": 100
+    }
+  },
+  "source_config": "configs/relu.yaml",
+  "torch_threads": 1,
+  "input_names": [
+    "x1",
+    "x2"
+  ],
+  "output_names": [
+    "y"
+  ],
+  "domain": {
+    "lower_bound": [
+      -5.0,
+      -5.0
+    ],
+    "upper_bound": [
+      5.0,
+      5.0
+    ]
+  },
+  "normalization": {
+    "x_shift": [
+      0.0,
+      0.0
+    ],
+    "x_scale": [
+      5.0,
+      5.0
+    ],
+    "y_shift": [
+      135.73830108977728
+    ],
+    "y_scale": [
+      110.086938103827
+    ]
+  },
+  "metrics": {
+    "train": {
+      "rmse": 3.078018938855822,
+      "max_abs_err": 20.342346209366156,
+      "rel_rmse": 0.02795989235301313,
+      "per_output": {
+        "y": {
+          "rmse": 3.078018938855822,
+          "max_abs_err": 20.342346209366156,
+          "rel_rmse": 0.02795989235301313
+        }
+      }
+    },
+    "val": {
+      "rmse": 3.2618829558114797,
+      "max_abs_err": 16.93387058246259,
+      "rel_rmse": 0.029247805573018263,
+      "per_output": {
+        "y": {
+          "rmse": 3.2618829558114797,
+          "max_abs_err": 16.93387058246259,
+          "rel_rmse": 0.029247805573018263
+        }
+      }
+    },
+    "test": {
+      "rmse": 3.1787501969873797,
+      "max_abs_err": 18.682677775000514,
+      "rel_rmse": 0.029550857781406727,
+      "per_output": {
+        "y": {
+          "rmse": 3.1787501969873797,
+          "max_abs_err": 18.682677775000514,
+          "rel_rmse": 0.029550857781406727
+        }
+      }
+    }
+  },
+  "training": {
+    "data": "himmelblau",
+    "depth": 4,
+    "width": 10,
+    "split": {
+      "train": 0.7,
+      "val": 0.15,
+      "test": 0.15
+    },
+    "split_seed": 0,
+    "seed": 0,
+    "settings": {
+      "lr": 0.003,
+      "batch_size": 64,
+      "epochs": 1000,
+      "patience": 100
+    },
+    "n_samples": {
+      "train": 7000,
+      "val": 1500,
+      "test": 1500
+    },
+    "epochs_run": 340,
+    "best_epoch": 240,
+    "train_seconds": 28.62
+  },
+  "activation": "relu",
+  "layer_sizes": [
+    2,
+    10,
+    10,
+    10,
+    10,
+    1
+  ]
+}

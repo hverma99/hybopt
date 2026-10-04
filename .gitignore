@@ -6,8 +6,6 @@
 *.docx
 repo-outline.md
 
-/outputs/
-
 /.claude
 
 # Python
