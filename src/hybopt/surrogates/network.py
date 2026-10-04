@@ -66,7 +66,7 @@ def save_model(model: nn.Sequential, activation: str, folder: Path, meta: dict) 
     layer_sizes = [linears[0].in_features] + [m.out_features for m in linears]
 
     torch.save(model.state_dict(), folder / "model.pt")
-    meta = {"activation": activation, "layer_sizes": layer_sizes, **meta}
+    meta = {**meta, "activation": activation, "layer_sizes": layer_sizes}
     (folder / "meta.json").write_text(json.dumps(meta, indent=2))
 
 

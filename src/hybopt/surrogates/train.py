@@ -87,9 +87,6 @@ def train_network(
 
 
 def error_metrics(raw_model: nn.Module, dm: DataModule) -> dict:
-    """
-    RMSE, MAE, and RMSE relative to std(y) per split, in raw output units.
-    """
     metrics = {}
     for name in ("train", "val", "test"):
         x, y = dm.x[dm.idx[name]], dm.y[dm.idx[name]]
