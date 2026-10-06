@@ -32,7 +32,7 @@ Other files:
 - `docs/description.md` — the latest project description (most current statement of scope).
 - `literature/` — the two reference papers (`s11081-026-10075-8.pdf` = Plate et al. 2026, ReLU; `s10957-018-1396-0.pdf` = Schweidtmann & Mitsos 2019, tanh) and `Project Design.docx`, the detailed design plan with the method menu and API.
 
-`.gitignore` excludes `/outputs/`, `/.venv/`, `*.pdf`, `*.docx`, `/literature`, and `/.vscode`.
+`.gitignore` excludes `/.venv/`, `*.pdf`, `*.docx`, `.DS_Store`, `/literature`, `/.vscode`, and `/.claude`. `outputs/` (benchmark data, trained models, logs) is committed so everyone works from the same networks.
 
 ## What the package will do
 
@@ -57,5 +57,5 @@ Note: `docs/description.md` (newer than the design doc) additionally adds tanh *
 
 ## Benchmarks and validation
 
-- Test functions: Peaks, Ackley, Himmelblau (trained NN approximations, direct output minimization). Campaign size: ReLU 1–4 hidden layers × 10–50 neurons; tanh 1–2 hidden layers × 10–50 neurons.
+- Test functions: Peaks, Ackley, Himmelblau (trained NN approximations, direct output minimization). Trained networks (`configs/relu.yaml`, `configs/tanh.yaml`): 1–4 hidden layers × 10–50 neurons for both ReLU and tanh, in `outputs/relu/` and `outputs/tanh/` (the design doc capped the tanh campaign at 1–2 hidden layers).
 - Correctness checks planned: formulation outputs vs. direct network evaluation, small problems with known solutions, bound validity, scaling preserving the network function, and cross-solver consistency.
