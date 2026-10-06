@@ -5,6 +5,7 @@
 *.pdf
 *.docx
 repo-outline.md
+.DS_Store
 
 /.claude
 
