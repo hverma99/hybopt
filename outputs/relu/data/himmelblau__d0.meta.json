@@ -1,0 +1,28 @@
+{
+  "config": {
+    "function": "himmelblau",
+    "n_samples": 10000,
+    "design": "lhs",
+    "seed": 0,
+    "split": {
+      "train": 0.7,
+      "val": 0.15,
+      "test": 0.15
+    }
+  },
+  "domain": {
+    "lower_bound": [
+      -5.0,
+      -5.0
+    ],
+    "upper_bound": [
+      5.0,
+      5.0
+    ]
+  },
+  "y_range": [
+    0.011607445502386056,
+    804.9359190269548
+  ],
+  "source_config": "configs/data.yaml"
+}

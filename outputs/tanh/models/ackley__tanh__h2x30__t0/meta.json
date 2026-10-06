@@ -1,0 +1,129 @@
+{
+  "config": {
+    "function": "ackley",
+    "dataset": "data/ackley__d0.csv",
+    "split": {
+      "train": 0.7,
+      "val": 0.15,
+      "test": 0.15
+    },
+    "activation": "tanh",
+    "hidden_widths": [
+      30,
+      30
+    ],
+    "seed": 0,
+    "settings": {
+      "lr": 0.003,
+      "batch_size": 64,
+      "epochs": 1000,
+      "patience": 100
+    }
+  },
+  "source_config": "configs/tanh.yaml",
+  "torch_threads": 1,
+  "input_names": [
+    "x1",
+    "x2"
+  ],
+  "output_names": [
+    "y"
+  ],
+  "domain": {
+    "lower_bound": [
+      -3.5,
+      -3.5
+    ],
+    "upper_bound": [
+      3.5,
+      3.5
+    ]
+  },
+  "normalization": {
+    "x_shift": [
+      0.0,
+      0.0
+    ],
+    "x_scale": [
+      3.5,
+      3.5
+    ],
+    "y_shift": [
+      7.740232214080883
+    ],
+    "y_scale": [
+      2.083860854148718
+    ]
+  },
+  "metrics": {
+    "train": {
+      "rmse": 0.1750638313831477,
+      "max_abs_err": 0.8514282976505783,
+      "rel_rmse": 0.08400936705280324,
+      "per_output": {
+        "y": {
+          "rmse": 0.1750638313831477,
+          "max_abs_err": 0.8514282976505783,
+          "rel_rmse": 0.08400936705280324
+        }
+      }
+    },
+    "val": {
+      "rmse": 0.1787187161449129,
+      "max_abs_err": 0.9363039901278682,
+      "rel_rmse": 0.08598384339038742,
+      "per_output": {
+        "y": {
+          "rmse": 0.1787187161449129,
+          "max_abs_err": 0.9363039901278682,
+          "rel_rmse": 0.08598384339038742
+        }
+      }
+    },
+    "test": {
+      "rmse": 0.1738952639453442,
+      "max_abs_err": 0.7850240173405183,
+      "rel_rmse": 0.08299272500234445,
+      "per_output": {
+        "y": {
+          "rmse": 0.1738952639453442,
+          "max_abs_err": 0.7850240173405183,
+          "rel_rmse": 0.08299272500234445
+        }
+      }
+    }
+  },
+  "training": {
+    "data": "ackley",
+    "depth": 2,
+    "width": 30,
+    "split": {
+      "train": 0.7,
+      "val": 0.15,
+      "test": 0.15
+    },
+    "split_seed": 0,
+    "seed": 0,
+    "settings": {
+      "lr": 0.003,
+      "batch_size": 64,
+      "epochs": 1000,
+      "patience": 100
+    },
+    "n_samples": {
+      "train": 10500,
+      "val": 2250,
+      "test": 2250
+    },
+    "epochs_run": 1000,
+    "best_epoch": 902,
+    "train_seconds": 151.27
+  },
+  "activation": "tanh",
+  "layer_sizes": [
+    2,
+    30,
+    30,
+    1
+  ]
+}

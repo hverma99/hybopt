@@ -1,0 +1,27 @@
+# ReLU network configuration for benchmarking.
+# This file defines the architecture and training settings
+# for several benchmark functions.
+
+# Nonlinear activation used in hidden layers of the network.
+activation: tanh
+
+# Benchmark objective functions to optimize/evaluate for each run.
+# Each function is a distinct test problem with different geometry and difficulty.
+functions: [peaks, ackley, himmelblau]
+
+# Random seed controlling data generation
+data_seed: 0
+
+# Candidate depths to test, measured as the number of hidden layers in the MLP.
+hidden_layers: [1, 2, 3, 4]
+
+# Candidate layer widths to test across the model architecture search space.
+widths: [10, 20, 30, 40, 50]
+
+# Random seeds for model initialization / reproducibility across repeated runs.
+seeds: [0]
+
+# Training hyperparameters used for optimization.
+# lr: learning rate, batch_size: mini-batch size,
+# epochs: maximum number of training epochs, patience: early-stopping patience.
+settings: {lr: 3.0e-3, batch_size: 64, epochs: 1000, patience: 100}
