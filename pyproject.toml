@@ -19,6 +19,9 @@ dependencies = [
     "pandas>=2.0",
     "joblib>=1.4",
     "pyyaml>=6.0",
+    "pyomo>=6.10",
+    "highspy>=1.10",
+    "gurobipy~=13.0",
 ]
 
 [project.optional-dependencies]
