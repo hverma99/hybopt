@@ -10,6 +10,7 @@ authors = [
     { name = "Brooke Soobrian" },
     { name = "Harshit Verma" },
     { name = "Zhe Li" },
+    { name = "Kouroche Bouchiat" },
 ]
 requires-python = ">=3.10"
 dependencies = [
