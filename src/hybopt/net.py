@@ -1,10 +1,13 @@
-"""
+r"""
 A trained feed-forward network as float64 NumPy arrays, the form every embedding method works on.
 
-With K hidden layers and the same activation sigma (ReLU or tanh) in each, the network maps raw
-inputs x in the box [lower_bound, upper_bound] to raw outputs y:
+With :math:`K` hidden layers and the same activation :math:`\sigma` (ReLU or tanh) in each, the
+network maps raw inputs :math:`x` in the box ``[lower_bound, upper_bound]`` to raw outputs :math:`y`:
 
-    x^0 = x,    x^k = sigma(W^k x^(k-1) + b^k)  for k = 1, ..., K,    y = W^(K+1) x^K + b^(K+1)
+.. math::
+
+    x^{(0)} = x, \qquad x^{(k)} = \sigma\left(W^{(k)} x^{(k-1)} + b^{(k)}\right)
+    \quad (k = 1, \dots, K), \qquad y = W^{(K+1)} x^{(K)} + b^{(K+1)}
 
 Typical use:
 
@@ -120,13 +123,15 @@ def sequential_activation(model: nn.Sequential) -> str:
 
 
 class FeedForwardNet:
-    """
+    r"""
     A dense feed-forward network in raw units, with the input box it is embedded on.
 
     Inputs
     ------
-    weights                   : W^1, ..., W^(K+1); W^k has shape (n_k, n_(k-1)), as in nn.Linear.
-    biases                    : b^1, ..., b^(K+1); b^k has shape (n_k,).
+    weights                   : :math:`W^{(1)}, \dots, W^{(K+1)}`; :math:`W^{(k)}` has shape
+                                :math:`(n_k, n_{k-1})`, as in ``nn.Linear``.
+    biases                    : :math:`b^{(1)}, \dots, b^{(K+1)}`; :math:`b^{(k)}` has shape
+                                :math:`(n_k,)`.
     activation                : "relu" or "tanh" in every hidden layer (the output layer is linear).
     lower_bound, upper_bound  : Input box, one finite value per input.
     input_names, output_names : Input and output names; default "x1", ... and "y" or "y1", ...

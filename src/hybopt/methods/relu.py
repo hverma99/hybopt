@@ -1,8 +1,9 @@
-"""
+r"""
 ReLU embedding methods (Plate et al. 2026). All use the big-M encoding of eq. (5); each changes one of
 the bounds, the network parameters, or the encoding.
 
-Layers are k = 0 (inputs), 1, ..., K (hidden) and K + 1 (outputs), neurons i, as in the paper.
+Layers are :math:`k = 0` (inputs), :math:`1, \dots, K` (hidden) and :math:`K + 1` (outputs), neurons
+:math:`i`, as in the paper.
 """
 
 import pyomo.environ as pyo
@@ -12,20 +13,23 @@ from hybopt.net import FeedForwardNet
 
 
 def add_bigm(block: pyo.Block, net: FeedForwardNet, bounds) -> None:
-    """
+    r"""
     Add ``net`` to ``block`` with the big-M encoding (eq. 5), using the pre-activation ``bounds``
     (one (L, U) pair per layer, see ``hybopt.bounds``) as big-M coefficients.
 
-    x[k, i]               : inputs (k = 0, within the box) and hidden-layer outputs x^(k)_i
-                            (within [max(L, 0), max(U, 0)]).
-    y[i]                  : outputs, y = W^(K+1) x^(K) + b^(K+1), within the output-layer bounds.
-    pre_activation[k, i]  : the expression W^(k)_i x^(k-1) + b^(k)_i, for k = 1, ..., K + 1.
-    z[k, i]               : binary, 1 if the neuron is active; only for unstable neurons (L < 0 < U),
+    x[k, i]               : inputs (k = 0, within the box) and hidden-layer outputs :math:`x^{(k)}_i`
+                            (within :math:`[\max(L, 0), \max(U, 0)]`).
+    y[i]                  : outputs, :math:`y = W^{(K+1)} x^{(K)} + b^{(K+1)}`, within the output-layer
+                            bounds.
+    pre_activation[k, i]  : the expression :math:`W^{(k)}_i x^{(k-1)} + b^{(k)}_i`, for
+                            :math:`k = 1, \dots, K + 1`.
+    z[k, i]               : binary, 1 if the neuron is active; only for unstable neurons
+                            (:math:`L < 0 < U`),
                             which get the constraints above_pre_activation, below_if_active and
                             zero_if_inactive of eq. (5).
 
-    Stable neurons need no binary (Section 2.1.2): stably_active sets x = pre-activation when L >= 0,
-    and the bounds [0, 0] fix x to zero when U <= 0.
+    Stable neurons need no binary (Section 2.1.2): stably_active sets x = pre-activation when :math:`L \ge 0`,
+    and the bounds :math:`[0, 0]` fix x to zero when :math:`U \le 0`.
     """
     sizes = net.layer_sizes
     n_hidden = len(sizes) - 2
