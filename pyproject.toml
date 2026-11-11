@@ -13,6 +13,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    "pyomo>=6.8",
     "numpy>=1.26",
     "scipy>=1.15",
     "torch>=2.2",
