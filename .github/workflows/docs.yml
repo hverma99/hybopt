@@ -1,0 +1,30 @@
+name: Docs
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      # setup
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Install project with doc deps
+        run: uv sync --group docs
+
+      # build (warnings are errors, so broken docstrings or references fail the check)
+      - name: Build HTML documentation
+        run: uv run sphinx-build -M html docs docs/_build -W --keep-going
+
+      # finalize
+      - name: Upload HTML result
+        uses: actions/upload-artifact@v4
+        with:
+          name: html_docs
+          path: docs/_build/html/*

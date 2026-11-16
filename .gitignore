@@ -14,3 +14,7 @@ repo-outline.md
 __pycache__/
 *.egg-info/
 .pytest_cache/
+
+# Sphinx
+/docs/_build/
+/docs/generated/

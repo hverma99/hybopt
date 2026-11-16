@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-**hybopt** is a CSE/APC 524 group project (Brooke Soobrian, Harshit Verma, Zhe Li; Fall 2026). Stages 1–2 of the pipeline (data generation, surrogate training) are implemented. On the optimization side, the network loader, interval bounds, method registry, `embed`, `minimize_output` and the first method R1 (`relu.bigm_ia`) are in place; R2–R5, the tanh methods, `benchmark.py` and scripts 3–4 are not yet.
+**hybopt** is a CSE/APC 524 group project (Brooke Soobrian, Harshit Verma, Zhe Li, Kouroche Bouchiat; Fall 2026). Stages 1–2 of the pipeline (data generation, surrogate training) are implemented. On the optimization side, the network loader, interval bounds, method registry, `embed`, `minimize_output` and the first method R1 (`relu.bigm_ia`) are in place; R2–R5, the tanh methods, `benchmark.py` and scripts 3–4 are not yet.
 
 Commands (a project `.venv` reuses the system NumPy/SciPy via `--system-site-packages`):
 - `python -m venv --system-site-packages .venv && .venv/Scripts/python -m pip install -e ".[dev]"` (rerun the editable install after adding a top-level package under `src/`)
