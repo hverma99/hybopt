@@ -28,7 +28,7 @@ def variable_list(variables, n_variables: int, label: str) -> list:
     return variables
 
 
-def embed(net: FeedForwardNet, method: str, inputs=None, outputs=None) -> pyo.Block:
+def embed(net: FeedForwardNet, method: str, inputs=None, outputs=None, **options) -> pyo.Block:
     """
     A Pyomo block holding ``net`` encoded with ``method`` (a key of ``hybopt.methods.METHODS``);
     attach it to a model with ``m.nn = embed(...)``.
@@ -36,6 +36,7 @@ def embed(net: FeedForwardNet, method: str, inputs=None, outputs=None) -> pyo.Bl
     inputs, outputs : The model's variables to tie to the network inputs and outputs, in the order of
                       net.input_names and net.output_names: an indexed Var, a single Var or a list.
                       Leave out to work with the block's own variables x[0, i] and y[i].
+    options         : Keyword options of the method, e.g. tol=0.01 for "tanh.pq".
 
     The block keeps its inputs within the network's box, where the encoding is valid.
     """
@@ -46,7 +47,7 @@ def embed(net: FeedForwardNet, method: str, inputs=None, outputs=None) -> pyo.Bl
         outputs = variable_list(outputs, net.n_outputs, "outputs")
 
     block = pyo.Block(concrete=True)
-    build(block, net)
+    build(block, net, **options)
     if inputs is not None:
         block.link_inputs = pyo.Constraint(
             range(net.n_inputs), rule=lambda b, i: inputs[i] == b.x[0, i]
