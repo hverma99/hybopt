@@ -3,12 +3,14 @@ Embedding methods by registry key; the keys are used across code, tests and benc
 
 A method adds a network to a Pyomo block, ``method(block, net)``, with input variables x[0, i] within
 the network's box and output variables y[i], which ``hybopt.embed`` ties to the model. Each key starts
-with the activation the method is for ("relu." or "tanh.").
+with the activation the method is for ("relu." or "tanh."). Keyword options of a method (e.g. tol for
+"tanh.pq") are passed through ``embed`` and ``minimize_output``.
 """
 
 from hybopt.methods.relu import bigm_ia
+from hybopt.methods.tanh import pq
 
-METHODS = {"relu.bigm_ia": bigm_ia}
+METHODS = {"relu.bigm_ia": bigm_ia, "tanh.pq": pq}
 
 
 def get_method(key: str, activation: str):

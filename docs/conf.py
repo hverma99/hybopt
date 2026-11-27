@@ -13,7 +13,15 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
+    "matplotlib.sphinxext.plot_directive",
 ]
+
+# Figures drawn by ``.. plot::`` in docstrings (e.g. hybopt.methods.tanh), from the package code.
+plot_include_source = False
+plot_html_show_source_link = False
+plot_html_show_formats = False
+plot_formats = [("png", 150)]
+plot_basedir = "figures"  # scripts named in ``.. plot:: <file>.py``
 
 # Generate a page per module for every autosummary :recursive: listing.
 autosummary_generate = True

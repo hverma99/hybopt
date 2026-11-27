@@ -87,3 +87,10 @@ def test_rejects_unknown_method_and_wrong_activation():
         embed(KINK, "relu.nope")
     with pytest.raises(ValueError, match="is for relu networks, but the network uses tanh"):
         embed(tanh_net, "relu.bigm_ia")
+
+
+def test_passes_method_options():
+    tanh_net = FeedForwardNet([[[1.0]], [[1.0]]], [[0.0], [0.0]], "tanh", [-3.0], [3.0])
+    coarse = embed(tanh_net, "tanh.pq", tol=10.0)
+    fine = embed(tanh_net, "tanh.pq", tol=0.001, max_pieces=20)
+    assert len(coarse.z) == 2 and len(fine.z) > 2

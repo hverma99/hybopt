@@ -42,6 +42,7 @@ def test_global_optimum_of_saved_networks(name, solver):
     assert np.all(net.lower_bound <= solution.x) and np.all(solution.x <= net.upper_bound)
     assert solution.objective == pytest.approx(net.predict(solution.x)[0, 0], abs=TOLERANCE)
     assert solution.objective <= grid_minimum(net) + TOLERANCE  # no grid point is better
+    assert solution.bound == pytest.approx(solution.objective, abs=TOLERANCE)  # exact method
 
 
 def test_solvers_agree():
@@ -78,3 +79,8 @@ def test_unknown_output():
 def test_unavailable_solver():
     with pytest.raises(ValueError, match="solver 'no_such_solver' is not available"):
         minimize_output(KINK, "relu.bigm_ia", solver="no_such_solver")
+
+
+def test_passes_method_options():
+    with pytest.raises(TypeError, match="unexpected keyword argument 'tol'"):
+        minimize_output(KINK, "relu.bigm_ia", tol=0.1)
