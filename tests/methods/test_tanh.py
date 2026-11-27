@@ -70,7 +70,7 @@ def test_quadratics_interpolate_tanh_at_the_endpoints():
     for p in all_pieces():
         for coefficients in (p.lower, p.upper):
             ends = np.array([p.a, p.b])
-            np.testing.assert_allclose(evaluate(coefficients, ends), np.tanh(ends), atol=1e-12)
+            np.testing.assert_allclose(evaluate(coefficients, ends), np.tanh(ends), atol=ROUNDING)
 
 
 def test_quadratics_enclose_tanh():
@@ -137,7 +137,7 @@ def test_degenerate_interval_is_padded():
     assert piece.a < 0.3 < piece.b
 
 
-@pytest.mark.parametrize("tol, max_pieces", [(0.0, 12), (-1.0, 12), (0.02, 0), (0.02, 2.5)])
+@pytest.mark.parametrize("tol, max_pieces", [(0.0, 12), (-1.0, 12), (0.02, 0), (0.02, -2.5), (0.02, 2.5)])
 def test_rejects_bad_options(tol, max_pieces):
     with pytest.raises(ValueError):
         tanh_pieces(-1.0, 1.0, tol, max_pieces)
