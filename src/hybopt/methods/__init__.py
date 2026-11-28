@@ -7,10 +7,10 @@ with the activation the method is for ("relu." or "tanh."). Keyword options of a
 "tanh.pq") are passed through ``embed`` and ``minimize_output``.
 """
 
-from hybopt.methods.relu import bigm_ia
+from hybopt.methods.relu import bigm_ia, bigm_obbt
 from hybopt.methods.tanh import pq
 
-METHODS = {"relu.bigm_ia": bigm_ia, "tanh.pq": pq}
+METHODS = {"relu.bigm_ia": bigm_ia, "relu.bigm_obbt": bigm_obbt, "tanh.pq": pq}
 
 
 def get_method(key: str, activation: str):

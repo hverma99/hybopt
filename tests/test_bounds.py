@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from hybopt.ann.network import build_model
-from hybopt.bounds import interval_bounds
+from hybopt.bounds import interval_bounds, obbt_bounds
 from hybopt.net import ACTIVATION_FUNCTIONS, FeedForwardNet
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -102,3 +102,57 @@ def test_bounds_contain_sampled_pre_activations(activation, widths, seed):
 def test_bounds_contain_pre_activations_of_saved_networks(folder):
     net = FeedForwardNet.load(folder)
     assert_contains(interval_bounds(net), pre_activations(net, samples_and_corners(net, 2000)))
+
+
+# y = relu(x) + relu(-x) on [-1, 1]: interval arithmetic gives y <= 2, the LP relaxation y <= 1
+ABSOLUTE_VALUE = FeedForwardNet([[[1.0], [-1.0]], [[1.0, 1.0]]], [[0.0, 0.0], [0.0]], "relu", [-1.0], [1.0])
+RELU_SAVED_NETWORKS = [
+    folder
+    for folder in SAVED_NETWORKS
+    if folder.parts[-3] == "relu" and folder.name.split("__")[2] in ("h1x10", "h2x10", "h2x20", "h3x10")
+]
+
+
+def test_obbt_tightens_a_hand_computed_bound():
+    (_, _), (lower, upper) = obbt_bounds(ABSOLUTE_VALUE)
+    assert interval_bounds(ABSOLUTE_VALUE)[-1][1][0] == 2.0
+    assert lower[0] == 0.0  # the interval bound is already tight
+    assert upper[0] == pytest.approx(1.0, abs=2e-6)
+
+
+def test_obbt_keeps_the_first_layer_and_is_never_looser():
+    net = random_net("relu", [8, 6, 4])
+    ia, obbt = interval_bounds(net), obbt_bounds(net)
+    assert [len(lower) for lower, _ in obbt] == [8, 6, 4, 2]
+    np.testing.assert_array_equal(obbt[0][0], ia[0][0])
+    np.testing.assert_array_equal(obbt[0][1], ia[0][1])
+    for (ia_lower, ia_upper), (lower, upper) in zip(ia, obbt):
+        assert np.all(ia_lower <= lower) and np.all(upper <= ia_upper) and np.all(lower <= upper)
+
+
+@pytest.mark.parametrize("widths", [[5], [6, 5], [10, 10, 10, 10]])
+@pytest.mark.parametrize("seed", [0, 1])
+def test_obbt_bounds_contain_sampled_pre_activations(widths, seed):
+    net = random_net("relu", widths, seed)
+    assert_contains(obbt_bounds(net), pre_activations(net, samples_and_corners(net, 2000)))
+
+
+@pytest.mark.parametrize("folder", RELU_SAVED_NETWORKS, ids=lambda folder: folder.name)
+def test_obbt_bounds_contain_pre_activations_of_saved_networks(folder):
+    net = FeedForwardNet.load(folder)
+    assert_contains(obbt_bounds(net), pre_activations(net, samples_and_corners(net, 2000)))
+
+
+def test_obbt_with_a_non_persistent_solver():
+    _, (_, upper) = obbt_bounds(ABSOLUTE_VALUE, solver="appsi_highs")
+    assert upper[0] == pytest.approx(1.0, abs=2e-6)
+
+
+def test_obbt_needs_a_relu_network():
+    with pytest.raises(ValueError, match="obbt_bounds needs a relu network, got tanh"):
+        obbt_bounds(random_net("tanh", [4]))
+
+
+def test_obbt_unavailable_solver():
+    with pytest.raises(ValueError, match="solver 'no_such_solver' is not available"):
+        obbt_bounds(ABSOLUTE_VALUE, solver="no_such_solver")

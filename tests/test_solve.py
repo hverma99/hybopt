@@ -9,6 +9,7 @@ from hybopt.solve import minimize_output
 
 ROOT = Path(__file__).resolve().parents[1]
 SOLVERS = ["appsi_highs", "gurobi_direct"]
+RELU_METHODS = ["relu.bigm_ia", "relu.bigm_obbt"]
 TOLERANCE = 1e-5  # MILP feasibility and integrality tolerances allow small deviations
 
 # y = 2 relu(x - 1) - relu(x) on [-2, 3]: minimum -1 at x = 1
@@ -25,20 +26,22 @@ def grid_minimum(net: FeedForwardNet, n_per_input: int = 301) -> float:
     return net.predict(grid).min()
 
 
+@pytest.mark.parametrize("method", RELU_METHODS)
 @pytest.mark.parametrize("solver", SOLVERS)
-def test_known_optimum(solver):
-    solution = minimize_output(KINK, "relu.bigm_ia", solver)
+def test_known_optimum(solver, method):
+    solution = minimize_output(KINK, method, solver)
     assert solution.x == pytest.approx([1.0], abs=TOLERANCE)
     assert solution.objective == pytest.approx(-1.0, abs=TOLERANCE)
 
 
+@pytest.mark.parametrize("method", RELU_METHODS)
 @pytest.mark.parametrize("solver", SOLVERS)
 @pytest.mark.parametrize(
     "name", ["peaks__relu__h1x10__t0", "peaks__relu__h2x10__t0", "ackley__relu__h1x10__t0"]
 )
-def test_global_optimum_of_saved_networks(name, solver):
+def test_global_optimum_of_saved_networks(name, solver, method):
     net = FeedForwardNet.load(ROOT / "outputs/relu/models" / name)
-    solution = minimize_output(net, "relu.bigm_ia", solver)
+    solution = minimize_output(net, method, solver)
     assert np.all(net.lower_bound <= solution.x) and np.all(solution.x <= net.upper_bound)
     assert solution.objective == pytest.approx(net.predict(solution.x)[0, 0], abs=TOLERANCE)
     assert solution.objective <= grid_minimum(net) + TOLERANCE  # no grid point is better
@@ -48,6 +51,12 @@ def test_global_optimum_of_saved_networks(name, solver):
 def test_solvers_agree():
     net = FeedForwardNet.load(ROOT / "outputs/relu/models/peaks__relu__h2x10__t0")
     objectives = [minimize_output(net, "relu.bigm_ia", solver).objective for solver in SOLVERS]
+    assert objectives[0] == pytest.approx(objectives[1], abs=TOLERANCE)
+
+
+def test_methods_agree():
+    net = FeedForwardNet.load(ROOT / "outputs/relu/models/himmelblau__relu__h3x20__t0")
+    objectives = [minimize_output(net, m, "gurobi_direct").objective for m in RELU_METHODS]
     assert objectives[0] == pytest.approx(objectives[1], abs=TOLERANCE)
 
 
