@@ -1,12 +1,12 @@
 import pytest
 
 from hybopt.methods import METHODS, get_method
-from hybopt.methods.relu import bigm_ia
+from hybopt.methods.relu import bigm_ia, bigm_obbt
 from hybopt.methods.tanh import pq
 
 
 def test_registered_methods():
-    assert METHODS == {"relu.bigm_ia": bigm_ia, "tanh.pq": pq}
+    assert METHODS == {"relu.bigm_ia": bigm_ia, "relu.bigm_obbt": bigm_obbt, "tanh.pq": pq}
 
 
 def test_get_method():
@@ -16,7 +16,7 @@ def test_get_method():
 
 @pytest.mark.parametrize("key", ["relu.bigm", "bigm_ia", "", "RELU.BIGM_IA"])
 def test_unknown_method(key):
-    with pytest.raises(KeyError, match=r"unknown method .*; available: \['relu.bigm_ia', 'tanh.pq'\]"):
+    with pytest.raises(KeyError, match=r"unknown method .*; available: \['relu.bigm_ia', 'relu.bigm_obbt', 'tanh.pq'\]"):
         get_method(key, "relu")
 
 

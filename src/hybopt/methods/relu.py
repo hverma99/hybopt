@@ -8,7 +8,7 @@ Layers are :math:`k = 0` (inputs), :math:`1, \dots, K` (hidden) and :math:`K + 1
 
 import pyomo.environ as pyo
 
-from hybopt.bounds import interval_bounds
+from hybopt.bounds import interval_bounds, obbt_bounds
 from hybopt.net import FeedForwardNet
 
 
@@ -85,3 +85,11 @@ def bigm_ia(block: pyo.Block, net: FeedForwardNet) -> None:
     R1 (relu.bigm_ia), the baseline: big-M encoding with interval-arithmetic bounds (eqs. 5-7).
     """
     add_bigm(block, net, interval_bounds(net))
+
+
+def bigm_obbt(block: pyo.Block, net: FeedForwardNet) -> None:
+    """
+    R2 (relu.bigm_obbt): big-M encoding with bounds from LP-based bound tightening (eq. 8), solved
+    with Gurobi; neurons the tighter bounds make stable get no binary.
+    """
+    add_bigm(block, net, obbt_bounds(net))

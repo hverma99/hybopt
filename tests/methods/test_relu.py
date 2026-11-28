@@ -5,8 +5,8 @@ import pyomo.environ as pyo
 import pytest
 
 from hybopt.ann.network import build_model
-from hybopt.bounds import interval_bounds
-from hybopt.methods.relu import add_bigm, bigm_ia
+from hybopt.bounds import interval_bounds, obbt_bounds
+from hybopt.methods.relu import add_bigm, bigm_ia, bigm_obbt
 from hybopt.net import FeedForwardNet
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -138,3 +138,31 @@ def test_add_bigm_uses_the_given_bounds():
 
     for x in sample_points(net, 3):
         assert_encodes(net, solve_at(net, x, build=build_loose), x)
+
+
+@pytest.mark.parametrize("widths", [[4], [6, 5], [5, 5, 5]])
+@pytest.mark.parametrize("seed", [0, 1])
+def test_obbt_encodes_random_networks(widths, seed):
+    net = random_net(widths, seed)
+    for x in sample_points(net, 5):
+        assert_encodes(net, solve_at(net, x, build=bigm_obbt), x)
+
+
+def test_obbt_encodes_a_saved_network():
+    net = FeedForwardNet.load(ROOT / "outputs/relu/models/peaks__relu__h2x10__t0")
+    for x in sample_points(net, 5):
+        assert_encodes(net, solve_at(net, x, build=bigm_obbt), x)
+
+
+@pytest.mark.parametrize("widths", [[6, 5], [8, 8, 8]])
+def test_obbt_uses_the_tightened_bounds_and_no_more_binaries(widths):
+    net = random_net(widths)
+    models = []
+    for build in (bigm_ia, bigm_obbt):
+        m = pyo.ConcreteModel()
+        m.nn = pyo.Block()
+        build(m.nn, net)
+        models.append(m)
+    assert len(models[1].nn.z) <= len(models[0].nn.z)
+    lower, upper = obbt_bounds(net)[-1]
+    assert models[1].nn.y[0].bounds == (lower[0], upper[0])
